@@ -48,7 +48,7 @@ jobs:
       deploy-matrix: ${{ steps.set-deploy-matrix.outputs.value }}
       deploy-matrix-is-empty:  ${{ steps.set-deploy-matrix-count.outputs.value == 0 }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v2
 
       - id: set-build-matrix
         run: echo value={\"path\":$(find . -type f -name Dockerfile | grep -v node_modules | xargs -I {} dirname {} | jq -R -s -c 'split("\n")' | jq '[ .[] | if length > 0 then . else empty end ]')} >> $GITHUB_OUTPUT
@@ -66,7 +66,7 @@ jobs:
     strategy:
       matrix: ${{fromJson(needs.set-matrices.outputs.build-matrix)}}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v2
 
       - name: Run Tests
         run: ./test.sh
@@ -82,7 +82,7 @@ jobs:
     strategy:
       matrix: ${{fromJson(needs.set-matrices.outputs.build-matrix)}}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v2
 
       - name: Read package.json
         id: package
@@ -92,7 +92,7 @@ jobs:
         working-directory: ${{ matrix.path }}
 
       - name: Login to ghcr.io
-        uses: docker/login-action@v2
+        uses: docker/login-action@v1
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -104,7 +104,7 @@ jobs:
           echo repository_owner=$(echo ${{ github.repository_owner }} | tr '[:upper:]' '[:lower:]') >> $GITHUB_ENV
 
       - name: Build and push container
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v2
         with:
           context: .
           file: ${{ matrix.path }}/Dockerfile
@@ -127,7 +127,7 @@ jobs:
     strategy:
       matrix: ${{fromJson(needs.set-matrices.outputs.deploy-matrix)}}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v2
 
       - name: Setup YQ
         uses: chrisdickinson/setup-yq@latest
