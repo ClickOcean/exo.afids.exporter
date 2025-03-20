@@ -1,0 +1,5 @@
+k8s:
+  clusters:
+    - name: orwell
+      rollout:
+        timeout: 5m
