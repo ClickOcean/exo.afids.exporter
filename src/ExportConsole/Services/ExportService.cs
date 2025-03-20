@@ -20,12 +20,11 @@ namespace ExportConsole.Services
         {
             var database = await _mongoDbService.ConnectToDatabase(config.MongoHost, config.MongoPort, config.MongoUsername, config.MongoPassword, config.MongoDatabase);
 
-            using var producer = _kafkaProducerService.CreateProducer(config.KafkaBrokers, config.KafkaClientId);
+            using var producer = _kafkaProducerService.CreateProducer(config.KafkaBrokers, config.KafkaClientId, config.BatchSize);
             var collection = _mongoDbService.GetCollection(database, config.MongoCollection);
 
             // Track metrics
             int totalProcessed = 0;
-            int totalBatches = 0;
             var startTime = DateTime.UtcNow;
 
             try
@@ -35,47 +34,31 @@ namespace ExportConsole.Services
                 // Get all documents
                 using (var cursor = await _mongoDbService.GetDocumentCursor(collection, config.BatchSize))
                 {
-                    var batch = new List<BsonDocument>(config.BatchSize);
                     while (await cursor.MoveNextAsync())
                     {
                         foreach (var document in cursor.Current)
                         {
-                            batch.Add(document);
+                            ProcessDocument(document, producer, config.KafkaTopic);
+                            totalProcessed++;
 
-                            if (batch.Count >= config.BatchSize)
+                            // Log progress
+                            if (totalProcessed % config.BatchSize == 0)
                             {
-                                await ProcessBatch(batch, producer, config.KafkaTopic);
-                                totalProcessed += batch.Count;
-                                totalBatches++;
-
-                                // Log progress
-                                if (totalBatches % 10 == 0)
-                                {
-                                    Console.WriteLine($"Processed {totalProcessed} documents in {totalBatches} batches");
-                                }
-
-                                batch.Clear();
+                                Console.WriteLine($"Processed {totalProcessed} documents");
                             }
                         }
                     }
-
-                    // Last docs
-                    if (batch.Count > 0)
-                    {
-                        await ProcessBatch(batch, producer, config.KafkaTopic);
-                        totalProcessed += batch.Count;
-                        totalBatches++;
-                    }
+                    
+                    producer.Flush(TimeSpan.FromSeconds(10));
                 }
 
                 var duration = DateTime.UtcNow - startTime;
-                Console.WriteLine($"Export completed. Processed {totalProcessed} documents in {totalBatches} batches");
+                Console.WriteLine($"Export completed. Processed {totalProcessed} documents");
                 Console.WriteLine($"Total time: {duration.TotalSeconds:F2} seconds ({totalProcessed / duration.TotalSeconds:F2} docs/sec)");
 
                 return new ExportResult
                 {
                     TotalProcessed = totalProcessed,
-                    TotalBatches = totalBatches,
                     Duration = duration
                 };
             }
@@ -86,27 +69,23 @@ namespace ExportConsole.Services
             }
         }
 
-        public async Task ProcessBatch(List<BsonDocument> batch, IProducer<string, string> producer, string topic)
+        public void ProcessDocument(BsonDocument document, IProducer<string, string> producer, string topic)
         {
-            var tasks = new List<Task>(batch.Count);
-            foreach (var document in batch)
+            try
             {
-                try
+                var afidAttr = BsonSerializer.Deserialize<AfidAttributes>(document);
+                if (afidAttr != null && !string.IsNullOrEmpty(afidAttr.Afid.ToString()) && afidAttr.Afid != 0)
                 {
-                    var afidAttr = BsonSerializer.Deserialize<AfidAttributes>(document);
-                    if (afidAttr != null && !string.IsNullOrEmpty(afidAttr.Afid.ToString()) && afidAttr.Afid != 0)
-                    {
-                        await _kafkaProducerService.ProduceMessageAsync(
-                            producer,
-                            topic,
-                            afidAttr.Afid.ToString(),
-                            document.ToString());
-                    }
+                    _kafkaProducerService.ProduceMessage(
+                        producer,
+                        topic,
+                        afidAttr.Afid.ToString(),
+                        document.ToString());
                 }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Error processing document: {ex.Message}");
-                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error processing document: {ex.Message}");
             }
         }
     }

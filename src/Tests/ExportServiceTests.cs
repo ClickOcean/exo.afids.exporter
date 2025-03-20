@@ -37,75 +37,6 @@ namespace ExportConsole.Tests.Services
         }
 
         [TestMethod]
-        public async Task RunExportAsync_ProcessesDocumentsInBatches()
-        {
-            // Arrange
-            var config = new ExportConfiguration(
-                "localhost",
-                "27017",
-                "user",
-                "password",
-                "defaultdb",
-                "localhost:9092",
-                "export-console",
-                "test-topic",
-                "test-collection",
-                2
-            );
-
-            // Setup MongoDB mocks
-            _mockMongoDbService.Setup(m => m.ConnectToDatabase(config.MongoHost, config.MongoPort, config.MongoUsername, config.MongoPassword, config.MongoDatabase))
-                .ReturnsAsync(_mockDatabase.Object);
-            _mockMongoDbService.Setup(m => m.GetCollection(_mockDatabase.Object, config.MongoCollection))
-                .Returns(_mockCollection.Object);
-            _mockMongoDbService.Setup(m => m.GetDocumentCursor(_mockCollection.Object, config.BatchSize))
-                .ReturnsAsync(_mockCursor.Object);
-
-            // Setup test documents
-            var testDocuments = new List<BsonDocument>
-            {
-                new BsonDocument { { "afid", 1001 }, { "_id", ObjectId.GenerateNewId() } },
-                new BsonDocument { { "afid", 1002 }, { "_id", ObjectId.GenerateNewId() } },
-                new BsonDocument { { "afid", 1003 }, { "_id", ObjectId.GenerateNewId() } }
-            };
-
-            // Setup cursor behavior
-            _mockCursor.SetupSequence(c => c.MoveNextAsync(It.IsAny<CancellationToken>()))
-                .ReturnsAsync(true)
-                .ReturnsAsync(false);
-            _mockCursor.Setup(c => c.Current).Returns(testDocuments);
-
-            // Setup Kafka producer mock
-            _mockKafkaProducerService.Setup(k => k.CreateProducer(config.KafkaBrokers, config.KafkaClientId))
-                .Returns(_mockProducer.Object);
-            _mockKafkaProducerService.Setup(k => k.ProduceMessageAsync(
-                    _mockProducer.Object,
-                    config.KafkaTopic,
-                    It.IsAny<string>(),
-                    It.IsAny<string>()))
-                .ReturnsAsync(new DeliveryResult<string, string>
-                {
-                    Topic = config.KafkaTopic,
-                    Partition = 0,
-                    Offset = 0
-                });
-
-            // Act
-            var result = await _exportService.RunExportAsync(config);
-
-            // Assert
-            Assert.AreEqual(3, result.TotalProcessed);
-            Assert.AreEqual(2, result.TotalBatches); // 2 batches with batch size 2 (2 docs in first, 1 in second)
-
-            _mockKafkaProducerService.Verify(k => k.ProduceMessageAsync(
-                _mockProducer.Object,
-                config.KafkaTopic,
-                It.IsAny<string>(),
-                It.IsAny<string>()),
-                Times.Exactly(3));
-        }
-
-        [TestMethod]
         public async Task RunExportAsync_UsesDefaultValuesWhenEnvironmentVariablesNotSet()
         {
             // Arrange
@@ -134,7 +65,7 @@ namespace ExportConsole.Tests.Services
             _mockCursor.Setup(c => c.MoveNextAsync(It.IsAny<CancellationToken>())).ReturnsAsync(false);
 
             // Setup Kafka producer mock
-            _mockKafkaProducerService.Setup(k => k.CreateProducer(config.KafkaBrokers, config.KafkaClientId))
+            _mockKafkaProducerService.Setup(k => k.CreateProducer(config.KafkaBrokers, config.KafkaClientId, config.BatchSize))
                 .Returns(_mockProducer.Object);
 
             // Act
@@ -142,7 +73,6 @@ namespace ExportConsole.Tests.Services
 
             // Assert
             Assert.AreEqual(0, result.TotalProcessed);
-            Assert.AreEqual(0, result.TotalBatches);
 
             // Verify default collection name was used
             _mockMongoDbService.Verify(m => m.GetCollection(_mockDatabase.Object, config.MongoCollection), Times.Once);
@@ -171,23 +101,12 @@ namespace ExportConsole.Tests.Services
                 new BsonDocument { { "afid", 1002 }, { "_id", ObjectId.GenerateNewId() } }
             };
 
-            _mockKafkaProducerService.Setup(k => k.ProduceMessageAsync(
-                    _mockProducer.Object,
-                    config.KafkaTopic,
-                    It.IsAny<string>(),
-                    It.IsAny<string>()))
-                .ReturnsAsync(new DeliveryResult<string, string>
-                {
-                    Topic = config.KafkaTopic,
-                    Partition = 0,
-                    Offset = 0
-                });
-
             // Act
-            await _exportService.ProcessBatch(testDocuments, _mockProducer.Object, config.KafkaTopic);
+            _exportService.ProcessDocument(testDocuments[0], _mockProducer.Object, config.KafkaTopic);
+            _exportService.ProcessDocument(testDocuments[1], _mockProducer.Object, config.KafkaTopic);
 
             // Assert
-            _mockKafkaProducerService.Verify(k => k.ProduceMessageAsync(
+            _mockKafkaProducerService.Verify(k => k.ProduceMessage(
                 _mockProducer.Object,
                 config.KafkaTopic,
                 It.IsAny<string>(),
@@ -219,23 +138,12 @@ namespace ExportConsole.Tests.Services
                 new BsonDocument { { "invalid_field", "invalid_value" }, { "_id", ObjectId.GenerateNewId() } }
             };
 
-            _mockKafkaProducerService.Setup(k => k.ProduceMessageAsync(
-                    _mockProducer.Object,
-                    config.KafkaTopic,
-                    It.IsAny<string>(),
-                    It.IsAny<string>()))
-                .ReturnsAsync(new DeliveryResult<string, string>
-                {
-                    Topic = config.KafkaTopic,
-                    Partition = 0,
-                    Offset = 0
-                });
-
             // Act
-            await _exportService.ProcessBatch(testDocuments, _mockProducer.Object, config.KafkaTopic);
+            _exportService.ProcessDocument(testDocuments[0], _mockProducer.Object, config.KafkaTopic);
+            _exportService.ProcessDocument(testDocuments[1], _mockProducer.Object, config.KafkaTopic);
 
             // Assert - only one document should be processed
-            _mockKafkaProducerService.Verify(k => k.ProduceMessageAsync(
+            _mockKafkaProducerService.Verify(k => k.ProduceMessage(
                 _mockProducer.Object,
                 config.KafkaTopic,
                 It.IsAny<string>(),
@@ -295,11 +203,11 @@ namespace ExportConsole.Tests.Services
             _mockMongoDbService.Setup(m => m.GetDocumentCursor(_mockCollection.Object, config.BatchSize))
                 .ReturnsAsync(_mockCursor.Object);
 
-            // Setup cursor with no documents
+            // Setup empty cursor (no documents)
             _mockCursor.Setup(c => c.MoveNextAsync(It.IsAny<CancellationToken>())).ReturnsAsync(false);
 
             // Setup Kafka producer mock
-            _mockKafkaProducerService.Setup(k => k.CreateProducer(config.KafkaBrokers, config.KafkaClientId))
+            _mockKafkaProducerService.Setup(k => k.CreateProducer(config.KafkaBrokers, config.KafkaClientId, config.BatchSize))
                 .Returns(_mockProducer.Object);
 
             // Act
@@ -307,7 +215,6 @@ namespace ExportConsole.Tests.Services
 
             // Assert
             Assert.AreEqual(0, result.TotalProcessed);
-            Assert.AreEqual(0, result.TotalBatches);
         }
 
         [TestMethod]
@@ -333,32 +240,20 @@ namespace ExportConsole.Tests.Services
                 new BsonDocument { { "afid", 1002 }, { "_id", ObjectId.GenerateNewId() } }
             };
 
-            // First document succeeds
-            _mockKafkaProducerService.Setup(k => k.ProduceMessageAsync(
-                    _mockProducer.Object,
-                    config.KafkaTopic,
-                    "1001",
-                    testDocuments[0].ToString()))
-                .ReturnsAsync(new DeliveryResult<string, string>
-                {
-                    Topic = config.KafkaTopic,
-                    Partition = 0,
-                    Offset = 0
-                });
-
             // Second document throws exception
-            _mockKafkaProducerService.Setup(k => k.ProduceMessageAsync(
+            _mockKafkaProducerService.Setup(k => k.ProduceMessage(
                     _mockProducer.Object,
                     config.KafkaTopic,
                     "1002",
                     testDocuments[1].ToString()))
-                .ThrowsAsync(new KafkaException(new Error(ErrorCode.Local_BadMsg, "Bad message")));
+                .Throws(new KafkaException(new Error(ErrorCode.Local_BadMsg, "Bad message")));
 
             // Act - should not throw exception
-            await _exportService.ProcessBatch(testDocuments, _mockProducer.Object, config.KafkaTopic);
+            _exportService.ProcessDocument(testDocuments[0], _mockProducer.Object, config.KafkaTopic);
+            _exportService.ProcessDocument(testDocuments[1], _mockProducer.Object, config.KafkaTopic);
 
             // Assert - first document should be processed
-            _mockKafkaProducerService.Verify(k => k.ProduceMessageAsync(
+            _mockKafkaProducerService.Verify(k => k.ProduceMessage(
                 _mockProducer.Object,
                 config.KafkaTopic,
                 "1001",

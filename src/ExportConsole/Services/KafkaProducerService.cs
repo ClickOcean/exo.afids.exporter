@@ -6,23 +6,28 @@ namespace ExportConsole.Services
     {
         public IProducer<string, string> CreateProducer(
             string bootstrapServers,
-            string clientId)
+            string clientId,
+            int batchSize = 100)
         {
             var config = new ProducerConfig
             {
                 BootstrapServers = bootstrapServers,
-                ClientId = clientId
+                ClientId = clientId,
+                BatchSize = batchSize
             };
             return new ProducerBuilder<string, string>(config).Build();
         }
 
-        public Task<DeliveryResult<string, string>> ProduceMessageAsync(
+        public void Flush(IProducer<string, string> producer, TimeSpan timeout) 
+            => producer.Flush(timeout);
+
+        public void ProduceMessage(
             IProducer<string, string> producer,
             string topic,
             string key,
             string value)
         {
-            return producer.ProduceAsync(topic, new Message<string, string>
+            producer.Produce(topic, new Message<string, string>
             {
                 Key = key,
                 Value = value

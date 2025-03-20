@@ -1,4 +1,4 @@
-# Editor directories and files
+﻿# Editor directories and files
 .vscode/*
 !.vscode/extensions.json
 .idea
@@ -10,3 +10,4 @@
 *.sw?
 **/obj
 **/bin
+**/.vs
