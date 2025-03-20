@@ -6,9 +6,9 @@ WORKDIR /app
 # This stage is used to build the service project
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG BUILD_CONFIGURATION=Release
-WORKDIR /src
-COPY ["ExportConsole/ExportConsole.csproj", "ExportConsole/"]
-RUN dotnet restore "./ExportConsole/ExportConsole.csproj"
+WORKDIR /
+COPY ["src/ExportConsole/ExportConsole.csproj", "src/ExportConsole/"]
+RUN dotnet restore "./src/ExportConsole/ExportConsole.csproj"
 COPY . .
 WORKDIR "/src/ExportConsole"
 RUN dotnet build "./ExportConsole.csproj" -c $BUILD_CONFIGURATION -o /app/build
