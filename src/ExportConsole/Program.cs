@@ -23,7 +23,7 @@ namespace ExportConsole
                 "test",
                 100);
 #else
-            var config = ExportConfiguration.FromEnvironment();
+            var config = new ExportConfiguration();
 #endif
 
             await exportService.RunExportAsync(config);

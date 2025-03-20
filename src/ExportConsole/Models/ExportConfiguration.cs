@@ -22,7 +22,12 @@
         KafkaClientId = Environment.GetEnvironmentVariable("KAFKA_CLIENT_ID") ?? throw new ArgumentNullException("KAFKA_CLIENT_ID");
         KafkaTopic = Environment.GetEnvironmentVariable("KAFKA_TOPIC") ?? throw new ArgumentNullException("KAFKA_TOPIC");
         MongoCollection = Environment.GetEnvironmentVariable("MONGO_COLLECTION") ?? throw new ArgumentNullException("MONGO_COLLECTION");
-        BatchSize = int.TryParse(Environment.GetEnvironmentVariable("BATCH_SIZE"), out int parsedBatchSize) ? parsedBatchSize : throw new ArgumentNullException("BATCH_SIZE");
+        string batchSizeStr = Environment.GetEnvironmentVariable("BATCH_SIZE") ?? throw new ArgumentNullException("BATCH_SIZE");
+        if (!int.TryParse(batchSizeStr, out int parsedBatchSize))
+        {
+            throw new FormatException($"BATCH_SIZE environment variable '{batchSizeStr}' is not a valid integer");
+        }
+        BatchSize = parsedBatchSize;
     }
 
     public ExportConfiguration(string mongoHost, string mongoPort, string mongoUsername, string mongoPassword, string mongoDatabase, string kafkaBrokers, string kafkaClientId, string kafkaTopic, string mongoCollection, int batchSize)
