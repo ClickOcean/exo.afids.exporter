@@ -19,7 +19,6 @@ spec:
               requests:
                 cpu: 600m             # Reserve 0.6 CPU
                 memory: 100Mi         # Reserve 100Mi RAM
-            command: ["dotnet", "/app/publish/ExportConsole.dll"]  # Entrypoint command
             env:                       # Environment variables passed into the container
               - name: MONGODB_URI
                 valueFrom:
