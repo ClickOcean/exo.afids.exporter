@@ -45,13 +45,13 @@ namespace ExportConsole.Services
                             if (totalProcessed % config.BatchSize == 0)
                             {
                                 Console.WriteLine($"Processed {totalProcessed} documents");
+                                producer.Flush(CancellationToken.None);
                             }
                         }
-                    }
-                    
-                    producer.Flush(TimeSpan.FromSeconds(10));
+                    }                    
                 }
 
+                producer.Flush(CancellationToken.None);
                 var duration = DateTime.UtcNow - startTime;
                 Console.WriteLine($"Export completed. Processed {totalProcessed} documents");
                 Console.WriteLine($"Total time: {duration.TotalSeconds:F2} seconds ({totalProcessed / duration.TotalSeconds:F2} docs/sec)");

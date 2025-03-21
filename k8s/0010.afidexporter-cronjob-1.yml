@@ -20,12 +20,6 @@ spec:
                 cpu: 600m             # Reserve 0.6 CPU
                 memory: 100Mi         # Reserve 100Mi RAM
             command: ["dotnet", "/app/publish/ExportConsole.dll"]  # Entrypoint command
-            livenessProbe:            # Health check to restart container if unresponsive
-              httpGet:
-                path: /healthz        # HTTP endpoint to ping
-                port: 8080            # Port for health check
-              failureThreshold: 5     # Allow 5 consecutive failures before marking unhealthy
-              periodSeconds: 60      # Check every 60 seconds
             env:                       # Environment variables passed into the container
               - name: MONGODB_URI
                 valueFrom:
@@ -35,11 +29,11 @@ spec:
               - name: MONGO_COLLECTION
                 value: "afids"
               - name: KAFKA_BROKERS
-                value: "kafka-broker:9092"
+                value: "lake-kafka-bootstrap.lake:9092"
               - name: KAFKA_CLIENT_ID
-                value: "afidexporter"
+                value: "exo.afids.exporter"
               - name: KAFKA_TOPIC
-                value: "afids-export-topic"
+                value: "difa.afids.v1"
               - name: BATCH_SIZE
                 value: "100"
           restartPolicy: Never         # Do not restart completed or failed jobs

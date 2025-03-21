@@ -12,15 +12,11 @@ namespace ExportConsole
 
 #if DEBUG
             var config = new ExportConfiguration(
-                "localhost",
-                "27017",
-                "",
-                "",
-                "defaultdb",
+                "mongodb://localhost:27017/defaultdb",
                 "test",
                 "localhost:9092",
                 "test",
-                "test",
+                "default-topic",
                 100);
 #else
             var config = new ExportConfiguration();
