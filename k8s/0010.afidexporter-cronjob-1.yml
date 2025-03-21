@@ -4,7 +4,7 @@ metadata:
   name: afidexporter-cronjob-1          # Unique name of the CronJob
   namespace: difa                       # Namespace isolation for this resource
 spec:
-  schedule: "0 * * * *"                 # Run once every hour (cron syntax)
+  schedule: "22 * * * *"                # Run once every hour (cron syntax)
   startingDeadlineSeconds: 60           # If a run is missed, allow it up to 60s late before skipping
   concurrencyPolicy: Forbid             # Prevent overlapping runs — if a job is still running, skip next
   suspend: false                        # Ensure scheduling is active (not paused)
@@ -14,7 +14,7 @@ spec:
         spec:
           containers:
           - name: afidexporter-cronjob-1  # Container name inside each Job pod
-            image: ghcr.io/clickocean/exo.afids.exporter/exo.afids.exporter:0.0.2  # Docker image to run
+            image: clickocean.io/automation/image  # Docker image to run
             resources:
               requests:
                 cpu: 600m             # Reserve 0.6 CPU
