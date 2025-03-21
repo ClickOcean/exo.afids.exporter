@@ -14,7 +14,7 @@ spec:
         spec:
           containers:
           - name: afidexporter-cronjob-1  # Container name inside each Job pod
-            image: ghcr.io/clickocean/exo.afids.exporter/exo.afids.exporter:latest  # Docker image to run
+            image: ghcr.io/clickocean/exo.afids.exporter/exo.afids.exporter:0.0.2  # Docker image to run
             resources:
               requests:
                 cpu: 600m             # Reserve 0.6 CPU
