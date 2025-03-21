@@ -18,7 +18,7 @@ namespace ExportConsole.Services
 
         public async Task<ExportResult> RunExportAsync(ExportConfiguration config)
         {
-            var database = await _mongoDbService.ConnectToDatabase(config.MongoHost, config.MongoPort, config.MongoUsername, config.MongoPassword, config.MongoDatabase);
+            var database = await _mongoDbService.ConnectToDatabase(config.MongoUrl);
 
             using var producer = _kafkaProducerService.CreateProducer(config.KafkaBrokers, config.KafkaClientId, config.BatchSize);
             var collection = _mongoDbService.GetCollection(database, config.MongoCollection);

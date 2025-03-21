@@ -41,20 +41,16 @@ namespace ExportConsole.Tests.Services
         {
             // Arrange
             var config = new ExportConfiguration(
-                "localhost",
-                "27017",
-                "user",
-                "password",
-                "defaultdb",
+                "mongodb://localhost:27017",
+                "testCollection",
                 "localhost:9092",
-                "export-console",
-                "default-topic",
-                "test",
+                "testClientId",
+                "testTopic",
                 100
             );
 
             // Setup MongoDB mocks
-            _mockMongoDbService.Setup(m => m.ConnectToDatabase(config.MongoHost, config.MongoPort, config.MongoUsername, config.MongoPassword, config.MongoDatabase))
+            _mockMongoDbService.Setup(m => m.ConnectToDatabase(config.MongoUrl))
                 .ReturnsAsync(_mockDatabase.Object);
             _mockMongoDbService.Setup(m => m.GetCollection(_mockDatabase.Object, config.MongoCollection))
                 .Returns(_mockCollection.Object);
@@ -83,15 +79,11 @@ namespace ExportConsole.Tests.Services
         {
             // Arrange
             var config = new ExportConfiguration(
-                "localhost",
-                "27017",
-                "user",
-                "password",
-                "defaultdb",
+                "mongodb://localhost:27017",
+                "testCollection",
                 "localhost:9092",
-                "export-console",
-                "test-topic",
-                "test-collection",
+                "testClientId",
+                "testTopic",
                 2
             );
 
@@ -119,15 +111,11 @@ namespace ExportConsole.Tests.Services
         {
             // Arrange
             var config = new ExportConfiguration(
-                "localhost",
-                "27017",
-                "user",
-                "password",
-                "defaultdb",
+                "mongodb://localhost:27017",
+                "testCollection",
                 "localhost:9092",
-                "export-console",
-                "test-topic",
-                "test-collection",
+                "testClientId",
+                "testTopic",
                 2
             );
 
@@ -157,19 +145,15 @@ namespace ExportConsole.Tests.Services
         {
             // Arrange
             var config = new ExportConfiguration(
-                "localhost",
-                "27017",
-                "user",
-                "password",
-                "defaultdb",
+                "mongodb://localhost:27017",
+                "testCollection",
                 "localhost:9092",
-                "export-console",
-                "default-topic",
-                "test",
+                "testClientId",
+                "testTopic",
                 100
             );
 
-            _mockMongoDbService.Setup(m => m.ConnectToDatabase(config.MongoHost, config.MongoPort, config.MongoUsername, config.MongoPassword, config.MongoDatabase))
+            _mockMongoDbService.Setup(m => m.ConnectToDatabase(config.MongoUrl))
                 .ThrowsAsync(new Exception("MongoDB connection failed"));
 
             // Act
@@ -183,20 +167,16 @@ namespace ExportConsole.Tests.Services
         {
             // Arrange
             var config = new ExportConfiguration(
-                "localhost",
-                "27017",
-                "user",
-                "password",
-                "defaultdb",
+                "mongodb://localhost:27017",
+                "testCollection",
                 "localhost:9092",
-                "export-console",
-                "test-topic",
-                "test",
+                "testClientId",
+                "testTopic",
                 10
             );
 
             // Setup MongoDB mocks
-            _mockMongoDbService.Setup(m => m.ConnectToDatabase(config.MongoHost, config.MongoPort, config.MongoUsername, config.MongoPassword, config.MongoDatabase))
+            _mockMongoDbService.Setup(m => m.ConnectToDatabase(config.MongoUrl))
                 .ReturnsAsync(_mockDatabase.Object);
             _mockMongoDbService.Setup(m => m.GetCollection(_mockDatabase.Object, config.MongoCollection))
                 .Returns(_mockCollection.Object);
@@ -222,15 +202,11 @@ namespace ExportConsole.Tests.Services
         {
             // Arrange
             var config = new ExportConfiguration(
-                "localhost",
-                "27017",
-                "user",
-                "password",
-                "defaultdb",
+                "mongodb://localhost:27017",
+                "testCollection",
                 "localhost:9092",
-                "export-console",
-                "test-topic",
-                "test-collection",
+                "testClientId",
+                "testTopic",
                 2
             );
 

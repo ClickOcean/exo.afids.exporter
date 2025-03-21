@@ -5,10 +5,20 @@ namespace ExportConsole.Services
 {
     public class MongoDbService : IMongoDbService
     {
-        public async Task<IMongoDatabase> ConnectToDatabase(string host, string port, string username, string password, string databaseName)
+        public async Task<IMongoDatabase> ConnectToDatabase(string mongoUrl)
         {
             Console.WriteLine("Connecting to MongoDB...");
-            var mongoClient = GetMongoClient(host, port, username, password);
+            var mongoClient = new MongoClient(mongoUrl);
+
+            // Extract the database name from the URL
+            var mongoUrlBuilder = new MongoUrlBuilder(mongoUrl);
+            var databaseName = mongoUrlBuilder.DatabaseName;
+
+            if (string.IsNullOrEmpty(databaseName))
+            {
+                throw new ArgumentException("Database name must be included in the connection URL.");
+            }
+
             var database = mongoClient.GetDatabase(databaseName);
 
             // Ping the server to verify connection
@@ -26,16 +36,6 @@ namespace ExportConsole.Services
         public Task<IAsyncCursor<BsonDocument>> GetDocumentCursor(IMongoCollection<BsonDocument> collection, int batchSize = 100)
         {
             return collection.Find(new BsonDocument(), new() { BatchSize = batchSize }).ToCursorAsync();
-        }
-
-        private MongoClient GetMongoClient(string host, string port, string username, string password)
-        {
-            if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
-            {
-                return new MongoClient($"mongodb://{host}:{port}");
-            }
-
-            return new MongoClient($"mongodb://{username}:{password}@{host}:{port}");
         }
     }
 }
