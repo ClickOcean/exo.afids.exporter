@@ -7,7 +7,7 @@ spec:
   schedule: "22 * * * *"                # Run once every hour (cron syntax)
   startingDeadlineSeconds: 60           # If a run is missed, allow it up to 60s late before skipping
   concurrencyPolicy: Forbid             # Prevent overlapping runs — if a job is still running, skip next
-  suspend: false                        # Ensure scheduling is active (not paused)
+  suspend: true                         # Ensure scheduling is active (not paused)
   jobTemplate:                          # Template for the Job to create each schedule
     spec:
       template:
@@ -35,7 +35,6 @@ spec:
                 value: "difa.afids.v1"
               - name: BATCH_SIZE
                 value: "100"
-          restartPolicy: Never         # Do not restart completed or failed jobs
-          suspend: true                # Suspend the job (not running)
+          restartPolicy: Never         # Do not restart completed or failed jobs          
           imagePullSecrets:
             - name: regcred            # Credentials for pulling from private registry
