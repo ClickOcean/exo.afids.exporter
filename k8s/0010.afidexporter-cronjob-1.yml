@@ -36,5 +36,6 @@ spec:
               - name: BATCH_SIZE
                 value: "100"
           restartPolicy: Never         # Do not restart completed or failed jobs
+          suspend: true                # Suspend the job (not running)
           imagePullSecrets:
-            - name: regcred           # Credentials for pulling from private registry
+            - name: regcred            # Credentials for pulling from private registry
