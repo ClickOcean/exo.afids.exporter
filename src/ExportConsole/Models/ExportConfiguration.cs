@@ -9,7 +9,7 @@
 
     public ExportConfiguration()
     {
-        MongoUrl = Environment.GetEnvironmentVariable("MONGO_URL") ?? throw new ArgumentNullException("MONGO_URL");
+        MongoUrl = Environment.GetEnvironmentVariable("MONGO_URI") ?? throw new ArgumentNullException("MONGO_URI");
         MongoCollection = Environment.GetEnvironmentVariable("MONGO_COLLECTION") ?? "afids"; //// Default to 'afids' collection from https://github.com/ClickOcean/difa-api/blob/b5b5773fd5fd48bd07ffe541648ad37141ecd218/src/db/afids/afids.schema.ts#L21
         KafkaBrokers = Environment.GetEnvironmentVariable("KAFKA_BROKERS") ?? throw new ArgumentNullException("KAFKA_BROKERS");
         KafkaClientId = Environment.GetEnvironmentVariable("KAFKA_CLIENT_ID") ?? throw new ArgumentNullException("KAFKA_CLIENT_ID");
