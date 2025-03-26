@@ -76,10 +76,12 @@ namespace ExportConsole.Services
                 var afidAttr = BsonSerializer.Deserialize<AfidAttributes>(document);
                 if (afidAttr != null && !string.IsNullOrEmpty(afidAttr.Afid.ToString()) && afidAttr.Afid != 0)
                 {
+                    //// Clear unique key for each document
+                    var key = afidAttr.Afid.ToString();
                     _kafkaProducerService.ProduceMessage(
                         producer,
                         topic,
-                        afidAttr.Afid.ToString(),
+                        key,
                         document.ToString());
                 }
             }
