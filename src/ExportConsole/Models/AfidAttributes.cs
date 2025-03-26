@@ -6,25 +6,26 @@ using System.Text.Json.Serialization;
 public class AfidAttributes
 {
     [JsonIgnore]
-    public BsonObjectId Id { get; set; }
+    [BsonId]
+    public BsonObjectId _id { get; set; }
 
-    [JsonPropertyName("afid")]
     [BsonElement("afid")]
+    [JsonPropertyName("afid")]
     public long Afid { get; set; }
 
-    [JsonPropertyName("afidType")]
     [BsonElement("afidType")]
+    [JsonPropertyName("afidType")]
     public string AfidType { get; set; }
 
-    [JsonPropertyName("afidSubType")]
-    [BsonElement("afidSubType")]
+    [BsonElement("stageName")]
+    [JsonPropertyName("stageName")]
     public string StageName { get; set; }
 
-    [JsonPropertyName("afidSubType")]
-    [BsonElement("afidSubType")]
+    [BsonElement("campaign")]
+    [JsonPropertyName("campaign")]
     public string Campaign { get; set; }
 
-    [JsonPropertyName("afidSubType")]
-    [BsonElement("afidSubType")]
+    [BsonElement("advGroup")]
+    [JsonPropertyName("advGroup")]
     public string AdvGroup { get; set; }
 }
