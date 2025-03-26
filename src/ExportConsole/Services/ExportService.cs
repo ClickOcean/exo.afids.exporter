@@ -2,6 +2,7 @@
 using ExportConsole.Models;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
+using System.Text.Json;
 
 namespace ExportConsole.Services
 {
@@ -82,7 +83,7 @@ namespace ExportConsole.Services
                         producer,
                         topic,
                         key,
-                        document.ToString());
+                        JsonSerializer.Serialize(afidAttr));
                 }
             }
             catch (Exception ex)

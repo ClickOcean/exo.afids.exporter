@@ -1,14 +1,8 @@
 ﻿using Confluent.Kafka;
-using ExportConsole.Models;
 using ExportConsole.Services;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using Moq;
-using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace ExportConsole.Tests.Services
 {
