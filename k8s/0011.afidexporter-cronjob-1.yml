@@ -35,14 +35,6 @@ spec:
                 value: "difa.afids.v1"
               - name: BATCH_SIZE
                 value: "100"
-            volumeMounts:
-              - name: data-storage
-                mountPath: /data  # Directory in the container
-          volumes:
-            - name: data-storage
-              persistentVolumeClaim:
-                claimName: afids-exporter-data-pvc
           restartPolicy: Never         # Do not restart completed or failed jobs          
           imagePullSecrets:
-            - name: regcred            # Credentials for pulling from private registry
-          
+            - name: regcred            # Credentials for pulling from private registry          

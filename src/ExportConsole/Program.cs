@@ -8,8 +8,7 @@ namespace ExportConsole
         {
             var mongoDbService = new MongoDbService();
             var kafkaProducerService = new KafkaProducerService();
-            var fileService = new FileService();
-            var exportService = new ExportService(mongoDbService, kafkaProducerService, fileService);
+            var exportService = new ExportService(mongoDbService, kafkaProducerService);
 
 #if DEBUG
             var config = new ExportConfiguration(
@@ -18,9 +17,18 @@ namespace ExportConsole
                 "localhost:9092",
                 "test",
                 "default-topic",
-                100);
+                100)
+            {
+                IsInitialRun = true
+            };
 #else
             var config = new ExportConfiguration();
+
+            if (args.Length != 0)
+            {
+                var configFilePath = args[0];
+                config = ExportConfiguration.LoadFromJsonFile(configFilePath);
+            }
 #endif
 
             await exportService.RunExportAsync(config);

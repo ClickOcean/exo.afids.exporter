@@ -1,11 +1,28 @@
-﻿public class ExportConfiguration
+﻿using System.Text.Json;
+using System.Text.Json.Serialization;
+
+public class ExportConfiguration
 {
+    [JsonPropertyName("MONGODB_URI")]
     public string MongoUrl { get; }
+
+    [JsonPropertyName("MONGO_COLLECTION")]
     public string MongoCollection { get; }
+
+    [JsonPropertyName("KAFKA_BROKERS")]
     public string KafkaBrokers { get; }
+
+    [JsonPropertyName("KAFKA_CLIENT_ID")]
     public string KafkaClientId { get; }
+
+    [JsonPropertyName("KAFKA_TOPIC")]
     public string KafkaTopic { get; }
+
+    [JsonPropertyName("BATCH_SIZE")]
     public int BatchSize { get; }
+
+    [JsonPropertyName("IS_INITIAL_RUN")]
+    public bool IsInitialRun { get; set; } = false;
 
     public ExportConfiguration()
     {
@@ -30,5 +47,15 @@
         KafkaClientId = kafkaClientId;
         KafkaTopic = kafkaTopic;
         BatchSize = batchSize;
+    }
+
+    public static ExportConfiguration LoadFromJsonFile(string configFilePath)
+    {
+        if (!File.Exists(configFilePath))
+        {
+            throw new FileNotFoundException($"Configuration file not found: {configFilePath}");
+        }
+        string json = File.ReadAllText(configFilePath);
+        return JsonSerializer.Deserialize<ExportConfiguration>(json);
     }
 }

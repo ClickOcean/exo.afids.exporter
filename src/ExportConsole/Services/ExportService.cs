@@ -10,16 +10,13 @@ namespace ExportConsole.Services
     {
         private readonly IMongoDbService _mongoDbService;
         private readonly IKafkaProducerService _kafkaProducerService;
-        private readonly IFileService _fileService;
 
         public ExportService(
-            IMongoDbService mongoDbService, 
-            IKafkaProducerService kafkaProducerService,
-            IFileService fileService)
+            IMongoDbService mongoDbService,
+            IKafkaProducerService kafkaProducerService)
         {
             _mongoDbService = mongoDbService;
             _kafkaProducerService = kafkaProducerService;
-            _fileService = fileService;
         }
 
         public async Task<ExportResult> RunExportAsync(ExportConfiguration config)
@@ -32,24 +29,15 @@ namespace ExportConsole.Services
             // Track metrics
             int totalProcessed = 0;
             var startTime = DateTime.UtcNow;
-            
-            // Retrieve the last run date if available
-            var lastRunDate = await _fileService.GetLastRunDateAsync();
-            if (lastRunDate.HasValue)
-            {
-                Console.WriteLine($"Last export run on: {lastRunDate.Value}");
-            }
-            else
-            {
-                Console.WriteLine("This is the first export run.");
-            }
 
+            // Retrieve the last run date if available
+            var weekAgoDate = DateTime.UtcNow.AddDays(-7);
             try
             {
                 Console.WriteLine($"Starting batch export with batch size: {config.BatchSize}");
 
                 // Get documents filtered by date (if lastRunDate is available)
-                using (var cursor = await _mongoDbService.GetDocumentCursorWithDateFilter(collection, lastRunDate, config.BatchSize))
+                using (var cursor = await _mongoDbService.GetDocumentCursorWithDateFilter(collection, weekAgoDate, config.BatchSize))
                 {
                     while (await cursor.MoveNextAsync())
                     {
@@ -65,17 +53,13 @@ namespace ExportConsole.Services
                                 producer.Flush(CancellationToken.None);
                             }
                         }
-                    }                    
+                    }
                 }
 
                 producer.Flush(CancellationToken.None);
                 var duration = DateTime.UtcNow - startTime;
                 Console.WriteLine($"Export completed. Processed {totalProcessed} documents");
                 Console.WriteLine($"Total time: {duration.TotalSeconds:F2} seconds ({totalProcessed / duration.TotalSeconds:F2} docs/sec)");
-
-                // Persist the current run date
-                await _fileService.SaveLastRunDateAsync(DateTime.UtcNow);
-                Console.WriteLine($"Saved current run date: {DateTime.UtcNow}");
 
                 return new ExportResult
                 {

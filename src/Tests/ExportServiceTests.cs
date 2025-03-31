@@ -16,7 +16,6 @@ namespace ExportConsole.Tests.Services
         private Mock<IMongoDatabase> _mockDatabase;
         private Mock<IMongoCollection<BsonDocument>> _mockCollection;
         private Mock<IAsyncCursor<BsonDocument>> _mockCursor;
-        private Mock<IFileService> _mockFileService;
 
         [TestInitialize]
         public void Setup()
@@ -27,9 +26,8 @@ namespace ExportConsole.Tests.Services
             _mockDatabase = new Mock<IMongoDatabase>();
             _mockCollection = new Mock<IMongoCollection<BsonDocument>>();
             _mockCursor = new Mock<IAsyncCursor<BsonDocument>>();
-            _mockFileService = new Mock<IFileService>();
 
-            _exportService = new ExportService(_mockMongoDbService.Object, _mockKafkaProducerService.Object, _mockFileService.Object);
+            _exportService = new ExportService(_mockMongoDbService.Object, _mockKafkaProducerService.Object);
         }
 
         [TestMethod]
@@ -43,14 +41,17 @@ namespace ExportConsole.Tests.Services
                 "testClientId",
                 "testTopic",
                 100
-            );
+            )
+            {
+                IsInitialRun = true
+            };
 
             // Setup MongoDB mocks
             _mockMongoDbService.Setup(m => m.ConnectToDatabase(config.MongoUrl))
                 .ReturnsAsync(_mockDatabase.Object);
             _mockMongoDbService.Setup(m => m.GetCollection(_mockDatabase.Object, config.MongoCollection))
                 .Returns(_mockCollection.Object);
-            _mockMongoDbService.Setup(m => m.GetDocumentCursorWithDateFilter(_mockCollection.Object, null, config.BatchSize))
+            _mockMongoDbService.Setup(m => m.GetDocumentCursorWithDateFilter(_mockCollection.Object, It.IsAny<DateTime?>(), config.BatchSize))
                 .ReturnsAsync(_mockCursor.Object);
 
             // Setup empty cursor (no documents)
@@ -81,7 +82,10 @@ namespace ExportConsole.Tests.Services
                 "testClientId",
                 "testTopic",
                 2
-            );
+            )
+            {
+                IsInitialRun = true
+            };
 
             var testDocuments = new List<BsonDocument>
             {
@@ -113,7 +117,10 @@ namespace ExportConsole.Tests.Services
                 "testClientId",
                 "testTopic",
                 2
-            );
+            )
+            {
+                IsInitialRun = true
+            };
 
             var testDocuments = new List<BsonDocument>
             {
@@ -147,7 +154,10 @@ namespace ExportConsole.Tests.Services
                 "testClientId",
                 "testTopic",
                 100
-            );
+            )
+            {
+                IsInitialRun = true
+            };
 
             _mockMongoDbService.Setup(m => m.ConnectToDatabase(config.MongoUrl))
                 .ThrowsAsync(new Exception("MongoDB connection failed"));
@@ -169,14 +179,17 @@ namespace ExportConsole.Tests.Services
                 "testClientId",
                 "testTopic",
                 10
-            );
+            )
+            {
+                IsInitialRun = true
+            };
 
             // Setup MongoDB mocks
             _mockMongoDbService.Setup(m => m.ConnectToDatabase(config.MongoUrl))
                 .ReturnsAsync(_mockDatabase.Object);
             _mockMongoDbService.Setup(m => m.GetCollection(_mockDatabase.Object, config.MongoCollection))
                 .Returns(_mockCollection.Object);
-            _mockMongoDbService.Setup(m => m.GetDocumentCursorWithDateFilter(_mockCollection.Object, null, config.BatchSize))
+            _mockMongoDbService.Setup(m => m.GetDocumentCursorWithDateFilter(_mockCollection.Object, It.IsAny<DateTime?>(), config.BatchSize))
                 .ReturnsAsync(_mockCursor.Object);
 
             // Setup empty cursor (no documents)
@@ -204,7 +217,10 @@ namespace ExportConsole.Tests.Services
                 "testClientId",
                 "testTopic",
                 2
-            );
+            )
+            {
+                IsInitialRun = true
+            };
 
             var testDocuments = new List<BsonDocument>
             {
