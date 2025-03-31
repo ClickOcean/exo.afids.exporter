@@ -42,11 +42,8 @@ namespace ExportConsole.Services
 
             if (lastRunDate.HasValue)
             {
-                // Filter for documents that were created or updated after the last run date
                 var lastRunDateBson = new BsonDateTime(lastRunDate.Value);
-                var createdFilter = Builders<BsonDocument>.Filter.Gt("created", lastRunDateBson);
-                var updatedFilter = Builders<BsonDocument>.Filter.Gt("updated", lastRunDateBson);
-                filter = Builders<BsonDocument>.Filter.Or(createdFilter, updatedFilter);
+                filter = Builders<BsonDocument>.Filter.Gt("updated", lastRunDateBson);
                 
                 Console.WriteLine($"Filtering documents created or updated after: {lastRunDate.Value}");
             }

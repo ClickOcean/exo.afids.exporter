@@ -89,8 +89,8 @@ namespace ExportConsole.Tests.Services
 
             var testDocuments = new List<BsonDocument>
             {
-                new BsonDocument { { "afid", 1001 }, { "_id", ObjectId.GenerateNewId() } },
-                new BsonDocument { { "afid", 1002 }, { "_id", ObjectId.GenerateNewId() } }
+                new() { { "afid", 1001 }, { "_id", ObjectId.GenerateNewId() } },
+                new() { { "afid", 1002 }, { "_id", ObjectId.GenerateNewId() } }
             };
 
             // Act
@@ -124,9 +124,9 @@ namespace ExportConsole.Tests.Services
 
             var testDocuments = new List<BsonDocument>
             {
-                new BsonDocument { { "afid", 1001 }, { "_id", ObjectId.GenerateNewId() } },
+                new() { { "afid", 1001 }, { "_id", ObjectId.GenerateNewId() } },
                 // Missing afid field
-                new BsonDocument { { "invalid_field", "invalid_value" }, { "_id", ObjectId.GenerateNewId() } }
+                new() { { "invalid_field", "invalid_value" }, { "_id", ObjectId.GenerateNewId() } }
             };
 
             // Act
@@ -224,8 +224,8 @@ namespace ExportConsole.Tests.Services
 
             var testDocuments = new List<BsonDocument>
             {
-                new BsonDocument { { "afid", 1001 }, { "_id", ObjectId.GenerateNewId() } },
-                new BsonDocument { { "afid", 1002 }, { "_id", ObjectId.GenerateNewId() } }
+                new() { { "afid", 1001 }, { "_id", ObjectId.GenerateNewId() } },
+                new() { { "afid", 1002 }, { "_id", ObjectId.GenerateNewId() } }
             };
 
             // Second document throws exception

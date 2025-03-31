@@ -6,38 +6,29 @@ using System.Text.Json;
 
 namespace ExportConsole.Services
 {
-    public class ExportService
+    public class ExportService(
+        IMongoDbService mongoDbService,
+        IKafkaProducerService kafkaProducerService)
     {
-        private readonly IMongoDbService _mongoDbService;
-        private readonly IKafkaProducerService _kafkaProducerService;
-
-        public ExportService(
-            IMongoDbService mongoDbService,
-            IKafkaProducerService kafkaProducerService)
-        {
-            _mongoDbService = mongoDbService;
-            _kafkaProducerService = kafkaProducerService;
-        }
-
         public async Task<ExportResult> RunExportAsync(ExportConfiguration config)
         {
-            var database = await _mongoDbService.ConnectToDatabase(config.MongoUrl);
+            var database = await mongoDbService.ConnectToDatabase(config.MongoUrl);
 
-            using var producer = _kafkaProducerService.CreateProducer(config.KafkaBrokers, config.KafkaClientId, config.BatchSize);
-            var collection = _mongoDbService.GetCollection(database, config.MongoCollection);
+            using var producer = kafkaProducerService.CreateProducer(config.KafkaBrokers, config.KafkaClientId, config.BatchSize);
+            var collection = mongoDbService.GetCollection(database, config.MongoCollection);
 
             // Track metrics
             int totalProcessed = 0;
             var startTime = DateTime.UtcNow;
 
             // Retrieve the last run date if available
-            var weekAgoDate = DateTime.UtcNow.AddDays(-7);
+            var weekAgoDate = DateTime.UtcNow.AddHours(-config.RangeInHours);
             try
             {
                 Console.WriteLine($"Starting batch export with batch size: {config.BatchSize}");
 
                 // Get documents filtered by date (if lastRunDate is available)
-                using (var cursor = await _mongoDbService.GetDocumentCursorWithDateFilter(collection, weekAgoDate, config.BatchSize))
+                using (var cursor = await mongoDbService.GetDocumentCursorWithDateFilter(collection, weekAgoDate, config.BatchSize))
                 {
                     while (await cursor.MoveNextAsync())
                     {
@@ -83,7 +74,7 @@ namespace ExportConsole.Services
                 {
                     //// Clear unique key for each document
                     var key = afidAttr.Afid.ToString();
-                    _kafkaProducerService.ProduceMessage(
+                    kafkaProducerService.ProduceMessage(
                         producer,
                         topic,
                         key,

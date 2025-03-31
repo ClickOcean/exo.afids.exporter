@@ -3,6 +3,8 @@ using System.Text.Json.Serialization;
 
 public class ExportConfiguration
 {
+    private const int DefaultRangeOfDate = 7 * 24;
+
     [JsonPropertyName("MONGODB_URI")]
     public string MongoUrl { get; }
 
@@ -24,6 +26,9 @@ public class ExportConfiguration
     [JsonPropertyName("IS_INITIAL_RUN")]
     public bool IsInitialRun { get; set; } = false;
 
+    [JsonPropertyName("RANGE_IN_HOURS")]
+    public int RangeInHours { get; set; } = DefaultRangeOfDate;
+
     public ExportConfiguration()
     {
         MongoUrl = Environment.GetEnvironmentVariable("MONGODB_URI") ?? throw new ArgumentNullException("MONGODB_URI");
@@ -32,6 +37,7 @@ public class ExportConfiguration
         KafkaClientId = Environment.GetEnvironmentVariable("KAFKA_CLIENT_ID") ?? throw new ArgumentNullException("KAFKA_CLIENT_ID");
         KafkaTopic = Environment.GetEnvironmentVariable("KAFKA_TOPIC") ?? throw new ArgumentNullException("KAFKA_TOPIC");
         string batchSizeStr = Environment.GetEnvironmentVariable("BATCH_SIZE") ?? throw new ArgumentNullException("BATCH_SIZE");
+        RangeInHours = int.TryParse(Environment.GetEnvironmentVariable("RANGE_IN_HOURS"), out int parsedRangeInHours) ? parsedRangeInHours : DefaultRangeOfDate;
         if (!int.TryParse(batchSizeStr, out int parsedBatchSize))
         {
             throw new FormatException($"BATCH_SIZE environment variable '{batchSizeStr}' is not a valid integer");
