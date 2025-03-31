@@ -1,7 +1,8 @@
 {
   "profiles": {
     "ExportConsole": {
-      "commandName": "Project"
+      "commandName": "Project",
+      "commandLineArgs": "\".\\ExportConfigurationExample.json\""
     },
     "Container (Dockerfile)": {
       "commandName": "Docker"

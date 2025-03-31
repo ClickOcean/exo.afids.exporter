@@ -1,0 +1,10 @@
+﻿{
+  "MONGODB_URI": "mongodb://localhost:27017/defaultdb",
+  "MONGO_COLLECTION": "afids",
+  "KAFKA_BROKERS": "localhost:9092",
+  "KAFKA_CLIENT_ID": "test",
+  "KAFKA_TOPIC": "default-topic",
+  "BATCH_SIZE": 100,
+  "IS_INITIAL_RUN": false,
+  "RANGE_IN_HOURS": 24
+}
