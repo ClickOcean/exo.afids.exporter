@@ -177,14 +177,14 @@ jobs:
             k8s_authorization_source=$(jq -r '.authorization | if has("source") then .source else "doctl" end' <<< "$line")
             k8s_authorization_insecure=$(jq -r '.authorization | if has("insecure") then .insecure else false end' <<< "$line")
             k8s_rollout_timeout=$(jq -r '.rollout | if has("timeout") then .timeout else "1m" end' <<< "$line")
-
+              
             echo "Deploying to $k8s_name"
             echo "k8s_authorization_source=$k8s_authorization_source"
             echo "k8s_authorization_insecure=$k8s_authorization_insecure"
             echo "k8s_rollout_timeout=$k8s_rollout_timeout"
-
+              
             mkdir -p ~/.kube
-
+              
             if [ "$k8s_authorization_source" = "doctl" ]; then
               echo "Save doctl kube config"
               doctl kubernetes cluster kubeconfig show $k8s_name --expiry-seconds 3600 > ~/.kube/config
@@ -194,10 +194,10 @@ jobs:
               echo "Switch context to $k8s_name"
               kubectl config use-context $k8s_name
             fi
-
+              
             [[ "$k8s_authorization_insecure" = true ]] && kubectl_insecure_flag="--insecure-skip-tls-verify" || kubectl_insecure_flag=""
-
+              
             kubectl apply -f ./k8s $kubectl_insecure_flag && \
-            kubectl rollout status deploy/${{ env.deployment-name }} -n ${{ env.deployment-namespace }} --timeout $k8s_rollout_timeout $kubectl_insecure_flag
+            kubectl rollout status deployment/${{ env.deployment-name }} -n ${{ env.deployment-namespace }} --timeout $k8s_rollout_timeout $kubectl_insecure_flag
           done
         working-directory: ${{ matrix.path }}
