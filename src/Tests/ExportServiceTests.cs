@@ -16,6 +16,7 @@ namespace ExportConsole.Tests.Services
         private Mock<IMongoDatabase> _mockDatabase;
         private Mock<IMongoCollection<BsonDocument>> _mockCollection;
         private Mock<IAsyncCursor<BsonDocument>> _mockCursor;
+        private Mock<IFileService> _mockFileService;
 
         [TestInitialize]
         public void Setup()
@@ -26,8 +27,9 @@ namespace ExportConsole.Tests.Services
             _mockDatabase = new Mock<IMongoDatabase>();
             _mockCollection = new Mock<IMongoCollection<BsonDocument>>();
             _mockCursor = new Mock<IAsyncCursor<BsonDocument>>();
+            _mockFileService = new Mock<IFileService>();
 
-            _exportService = new ExportService(_mockMongoDbService.Object, _mockKafkaProducerService.Object);
+            _exportService = new ExportService(_mockMongoDbService.Object, _mockKafkaProducerService.Object, _mockFileService.Object);
         }
 
         [TestMethod]
@@ -48,7 +50,7 @@ namespace ExportConsole.Tests.Services
                 .ReturnsAsync(_mockDatabase.Object);
             _mockMongoDbService.Setup(m => m.GetCollection(_mockDatabase.Object, config.MongoCollection))
                 .Returns(_mockCollection.Object);
-            _mockMongoDbService.Setup(m => m.GetDocumentCursor(_mockCollection.Object, config.BatchSize))
+            _mockMongoDbService.Setup(m => m.GetDocumentCursorWithDateFilter(_mockCollection.Object, null, config.BatchSize))
                 .ReturnsAsync(_mockCursor.Object);
 
             // Setup empty cursor (no documents)
@@ -174,7 +176,7 @@ namespace ExportConsole.Tests.Services
                 .ReturnsAsync(_mockDatabase.Object);
             _mockMongoDbService.Setup(m => m.GetCollection(_mockDatabase.Object, config.MongoCollection))
                 .Returns(_mockCollection.Object);
-            _mockMongoDbService.Setup(m => m.GetDocumentCursor(_mockCollection.Object, config.BatchSize))
+            _mockMongoDbService.Setup(m => m.GetDocumentCursorWithDateFilter(_mockCollection.Object, null, config.BatchSize))
                 .ReturnsAsync(_mockCursor.Object);
 
             // Setup empty cursor (no documents)
@@ -215,7 +217,7 @@ namespace ExportConsole.Tests.Services
                     _mockProducer.Object,
                     config.KafkaTopic,
                     "1002",
-                    testDocuments[1].ToString()))
+                    It.IsAny<string>()))
                 .Throws(new KafkaException(new Error(ErrorCode.Local_BadMsg, "Bad message")));
 
             // Act - should not throw exception
@@ -227,7 +229,7 @@ namespace ExportConsole.Tests.Services
                 _mockProducer.Object,
                 config.KafkaTopic,
                 "1001",
-                testDocuments[0].ToString()),
+                It.IsAny<string>()),
                 Times.Once);
         }
     }

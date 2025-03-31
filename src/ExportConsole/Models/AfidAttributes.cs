@@ -28,4 +28,12 @@ public class AfidAttributes
     [BsonElement("advGroup")]
     [JsonPropertyName("advGroup")]
     public string AdvGroup { get; set; }
+
+    [BsonElement("created")]
+    [JsonIgnore]
+    public DateTime Created { get; set; }
+
+    [BsonElement("updated")]
+    [JsonIgnore]
+    public DateTime Updated { get; set; }
 }

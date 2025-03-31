@@ -8,7 +8,8 @@ namespace ExportConsole
         {
             var mongoDbService = new MongoDbService();
             var kafkaProducerService = new KafkaProducerService();
-            var exportService = new ExportService(mongoDbService, kafkaProducerService);
+            var fileService = new FileService();
+            var exportService = new ExportService(mongoDbService, kafkaProducerService, fileService);
 
 #if DEBUG
             var config = new ExportConfiguration(

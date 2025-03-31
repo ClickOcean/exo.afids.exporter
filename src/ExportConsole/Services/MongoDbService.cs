@@ -33,9 +33,31 @@ namespace ExportConsole.Services
             return database.GetCollection<BsonDocument>(collectionName);
         }
 
-        public Task<IAsyncCursor<BsonDocument>> GetDocumentCursor(IMongoCollection<BsonDocument> collection, int batchSize = 100)
+        public Task<IAsyncCursor<BsonDocument>> GetDocumentCursorWithDateFilter(
+            IMongoCollection<BsonDocument> collection, 
+            DateTime? lastRunDate,
+            int batchSize = 100)
         {
-            return collection.Find(new BsonDocument(), new() { BatchSize = batchSize }).ToCursorAsync();
+            FilterDefinition<BsonDocument> filter;
+
+            if (lastRunDate.HasValue)
+            {
+                // Filter for documents that were created or updated after the last run date
+                var lastRunDateBson = new BsonDateTime(lastRunDate.Value);
+                var createdFilter = Builders<BsonDocument>.Filter.Gt("created", lastRunDateBson);
+                var updatedFilter = Builders<BsonDocument>.Filter.Gt("updated", lastRunDateBson);
+                filter = Builders<BsonDocument>.Filter.Or(createdFilter, updatedFilter);
+                
+                Console.WriteLine($"Filtering documents created or updated after: {lastRunDate.Value}");
+            }
+            else
+            {
+                // If no last run date is available, get all documents
+                filter = new BsonDocument();
+                Console.WriteLine("No date filter applied - retrieving all documents");
+            }
+
+            return collection.Find(filter, new() { BatchSize = batchSize }).ToCursorAsync();
         }
     }
 }
