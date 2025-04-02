@@ -4,7 +4,7 @@ metadata:
   name: afidexporter-cronjob-1          # Unique name of the CronJob
   namespace: difa                       # Namespace isolation for this resource
 spec:
-  schedule: "22 * * * *"                # Run once every hour (cron syntax)
+  schedule: "55 * * * *"                # Run once every hour (cron syntax)
   startingDeadlineSeconds: 60           # If a run is missed, allow it up to 60s late before skipping
   concurrencyPolicy: Forbid             # Prevent overlapping runs — if a job is still running, skip next
   suspend: false                        # Ensure scheduling is active (not paused)
@@ -35,6 +35,8 @@ spec:
                 value: "difa.afids.v1"
               - name: BATCH_SIZE
                 value: "100"
+              - name: IS_INITIAL_RUN
+                value: "true"
           restartPolicy: Never         # Do not restart completed or failed jobs          
           imagePullSecrets:
             - name: regcred            # Credentials for pulling from private registry          

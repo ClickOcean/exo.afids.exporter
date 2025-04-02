@@ -55,6 +55,7 @@ public class ExportConfiguration
             BatchSize = !int.TryParse(Environment.GetEnvironmentVariable("BATCH_SIZE") ?? throw new ArgumentNullException("BATCH_SIZE"), out int parsedBatchSize)
             ? throw new FormatException($"BATCH_SIZE environment variable is not a valid integer")
             : parsedBatchSize,
+            IsInitialRun = bool.TryParse(Environment.GetEnvironmentVariable("IS_INITIAL_RUN"), out bool parsedIsInitialRun) && parsedIsInitialRun,
             KafkaSslCaPem = Environment.GetEnvironmentVariable("KAFKA_SSL_CA_PEM"),
             KafkaSslCertificatePem = Environment.GetEnvironmentVariable("KAFKA_SSL_CERTIFICATE_PEM"),
             KafkaSslKeyPem = Environment.GetEnvironmentVariable("KAFKA_SSL_KEY_PEM"),
