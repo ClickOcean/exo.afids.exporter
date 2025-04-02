@@ -58,7 +58,7 @@ namespace ExportConsole.Tests.Services
             _mockCursor.Setup(c => c.MoveNextAsync(It.IsAny<CancellationToken>())).ReturnsAsync(false);
 
             // Setup Kafka producer mock
-            _mockKafkaProducerService.Setup(k => k.CreateProducer(config.KafkaBrokers, config.KafkaClientId, config.BatchSize))
+            _mockKafkaProducerService.Setup(k => k.CreateProducer(config.KafkaBrokers, config.KafkaClientId, config.BatchSize, It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<string?>()))
                 .Returns(_mockProducer.Object);
 
             // Act
@@ -196,7 +196,7 @@ namespace ExportConsole.Tests.Services
             _mockCursor.Setup(c => c.MoveNextAsync(It.IsAny<CancellationToken>())).ReturnsAsync(false);
 
             // Setup Kafka producer mock
-            _mockKafkaProducerService.Setup(k => k.CreateProducer(config.KafkaBrokers, config.KafkaClientId, config.BatchSize))
+            _mockKafkaProducerService.Setup(k => k.CreateProducer(config.KafkaBrokers, config.KafkaClientId, config.BatchSize, It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<string?>()))
                 .Returns(_mockProducer.Object);
 
             // Act

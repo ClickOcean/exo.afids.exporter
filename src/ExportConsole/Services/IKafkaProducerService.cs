@@ -4,7 +4,13 @@ namespace ExportConsole.Services
 {
     public interface IKafkaProducerService
     {
-        IProducer<string, string> CreateProducer(string bootstrapServers, string clientId, int batchSize = 100);
+        IProducer<string, string> CreateProducer(
+            string bootstrapServers,
+            string clientId,
+            int batchSize = 100,
+            string? sslKeyPem = null,
+            string? sslCertificatePem = null,
+            string? sslCaPem = null);
 
         void ProduceMessage(
             IProducer<string, string> producer,

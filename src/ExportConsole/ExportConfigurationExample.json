@@ -3,8 +3,11 @@
   "MONGO_COLLECTION": "afids",
   "KAFKA_BROKERS": "localhost:9092",
   "KAFKA_CLIENT_ID": "test",
-  "KAFKA_TOPIC": "default-topic",
+  "KAFKA_TOPIC": "difa.afids.v1",
   "BATCH_SIZE": 100,
   "IS_INITIAL_RUN": false,
-  "RANGE_IN_HOURS": 24
+  "RANGE_IN_HOURS": 24,
+  "KAFKA_SSL_KEY_PEM": "",
+  "KAFKA_SSL_CERTIFICATE_PEM": "",
+  "KAFKA_SSL_CA_PEM": ""
 }

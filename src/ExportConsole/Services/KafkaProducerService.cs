@@ -7,7 +7,10 @@ namespace ExportConsole.Services
         public IProducer<string, string> CreateProducer(
             string bootstrapServers,
             string clientId,
-            int batchSize = 100)
+            int batchSize = 100,
+            string? sslKeyPem = null,
+            string? sslCertificatePem = null,
+            string? sslCaPem = null)
         {
             var config = new ProducerConfig
             {
@@ -15,6 +18,15 @@ namespace ExportConsole.Services
                 ClientId = clientId,
                 BatchSize = batchSize
             };
+
+            if (!string.IsNullOrEmpty(sslKeyPem) && !string.IsNullOrEmpty(sslCertificatePem) && !string.IsNullOrEmpty(sslCaPem))
+            {
+                config.SecurityProtocol = SecurityProtocol.Ssl;
+                config.SslKeyPem = sslKeyPem;
+                config.SslCertificatePem = sslCertificatePem;
+                config.SslCaPem = sslCaPem;
+            }
+
             return new ProducerBuilder<string, string>(config).Build();
         }
 

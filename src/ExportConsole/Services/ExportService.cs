@@ -14,7 +14,7 @@ namespace ExportConsole.Services
         {
             var database = await mongoDbService.ConnectToDatabase(config.MongoUrl);
 
-            using var producer = kafkaProducerService.CreateProducer(config.KafkaBrokers, config.KafkaClientId, config.BatchSize);
+            using var producer = kafkaProducerService.CreateProducer(config.KafkaBrokers, config.KafkaClientId, config.BatchSize, config.KafkaSslKeyPem, config.KafkaSslCertificatePem, config.KafkaSslCaPem);
             var collection = mongoDbService.GetCollection(database, config.MongoCollection);
 
             // Track metrics

@@ -29,6 +29,15 @@ public class ExportConfiguration
     [JsonPropertyName("RANGE_IN_HOURS")]
     public int RangeInHours { get; init; } = DefaultRangeOfDate;
 
+    [JsonPropertyName("KAFKA_SSL_KEY_PEM")]
+    public string? KafkaSslKeyPem { get; set; }
+
+    [JsonPropertyName("KAFKA_SSL_CERTIFICATE_PEM")]
+    public string? KafkaSslCertificatePem { get; set; }
+
+    [JsonPropertyName("KAFKA_SSL_CA_PEM")]
+    public string? KafkaSslCaPem { get; set; }
+
     public ExportConfiguration()
     {
     }
@@ -45,7 +54,10 @@ public class ExportConfiguration
             RangeInHours = int.TryParse(Environment.GetEnvironmentVariable("RANGE_IN_HOURS"), out int parsedRangeInHours) ? parsedRangeInHours : DefaultRangeOfDate,
             BatchSize = !int.TryParse(Environment.GetEnvironmentVariable("BATCH_SIZE") ?? throw new ArgumentNullException("BATCH_SIZE"), out int parsedBatchSize)
             ? throw new FormatException($"BATCH_SIZE environment variable is not a valid integer")
-            : parsedBatchSize
+            : parsedBatchSize,
+            KafkaSslCaPem = Environment.GetEnvironmentVariable("KAFKA_SSL_CA_PEM"),
+            KafkaSslCertificatePem = Environment.GetEnvironmentVariable("KAFKA_SSL_CERTIFICATE_PEM"),
+            KafkaSslKeyPem = Environment.GetEnvironmentVariable("KAFKA_SSL_KEY_PEM"),
         };
     }
 
